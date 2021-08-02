@@ -182,12 +182,15 @@ Rcpp::List jaspPlot::getOldPlotInfo(Rcpp::List & plotInfo)
 		jaspPrint("could not find an old plot");
 		return Rcpp::List();
 	}
-	jaspPrint("found a " + oldPlot->type() + " with name: " + oldPlot->_name);
+	jaspPrint("found a " + oldPlot->type() + " with name: " + oldPlot->_name + ". Modified by user: " + (oldPlot->_userResized ? "yes" : "no"));
 
-	_width				= oldPlot->_width;
-	_height				= oldPlot->_height;
-	plotInfo["width"]	= _width;
-	plotInfo["height"]	= _height;
+	if (!oldPlot->_userResized)
+	{
+		_width				= oldPlot->_width;
+		_height				= oldPlot->_height;
+		plotInfo["width"]	= _width;
+		plotInfo["height"]	= _height;
+	}
 
 	if (oldPlot->_editOptions == Json::nullValue)
 		return Rcpp::List();
