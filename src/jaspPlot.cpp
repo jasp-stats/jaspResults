@@ -182,9 +182,9 @@ Rcpp::List jaspPlot::getOldPlotInfo(Rcpp::List & plotInfo)
 		jaspPrint("could not find an old plot");
 		return Rcpp::List();
 	}
-	jaspPrint("found a " + oldPlot->type() + " with name: " + oldPlot->_name + ". Modified by user: " + (oldPlot->_userResized ? "yes" : "no"));
+	jaspPrint("found a " + oldPlot->type() + " with name: " + oldPlot->_name + ". Resized by user: " + (oldPlot->_resizedByUser ? "yes" : "no"));
 
-	if (!oldPlot->_userResized)
+	if (oldPlot->_resizedByUser)
 	{
 		_width				= oldPlot->_width;
 		_height				= oldPlot->_height;
@@ -214,6 +214,7 @@ Json::Value jaspPlot::convertToJSON() const
 	obj["revision"]				= _revision;
 	obj["environmentName"]		= _envName;
 	obj["editOptions"]			= _editOptions;
+	obj["resizedByUser"]		= _resizedByUser;
 
 	return obj;
 }
@@ -230,6 +231,7 @@ void jaspPlot::convertFromJSON_SetFields(Json::Value in)
 	_filePathPng	= in.get("filePathPng",		"null").asString();
 	_envName		= in.get("environmentName",	_envName).asString();
 	_editOptions	= in.get("editOptions",		Json::nullValue);
+	_resizedByUser	= in.get("resizedByUser",	false).asBool();
 	
 	setUserPlotChangesFromRStateObject();
 	
