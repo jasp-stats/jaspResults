@@ -180,18 +180,18 @@ decodeplot.gg <- function(x, returnGrob = TRUE) {
     if (!is.null(labels[[i]]))
       labels[[i]] <- decodeColNames(labels[[i]])
     
-    x[["labels"]] <- labels
-    if (returnGrob) {
-      grDevices::png(f <- tempfile())
-      on.exit({
-        grDevices::dev.off()
-        if (file.exists(f))
-          file.remove(f)
-      })
-      return(decodeplot.gTree(ggplot2::ggplotGrob(x)))
-    } else {
-      return(x)
-    }
+  x[["labels"]] <- labels
+  if (returnGrob) {
+    grDevices::png(f <- tempfile())
+    on.exit({
+      grDevices::dev.off()
+      if (file.exists(f))
+        file.remove(f)
+    })
+    return(decodeplot.gTree(ggplot2::ggplotGrob(x)))
+  } else {
+    return(x)
+  }
 }
 
 decodeplot.recordedplot <- function(x) {
