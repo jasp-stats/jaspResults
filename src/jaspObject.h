@@ -37,7 +37,7 @@ public:
 						jaspObject()										: _title(""),		_type(jaspObjectType::unknown)	{ allocatedObjects->insert(this); }
 						jaspObject(Rcpp::String title)						: _title(jaspNativeToUtf8(title)),	_type(jaspObjectType::unknown)	{ allocatedObjects->insert(this); }
 						jaspObject(jaspObjectType type, Rcpp::String title)	: _title(jaspNativeToUtf8(title)),	_type(type)						{ allocatedObjects->insert(this); }
-						jaspObject(const jaspObject& that) = delete;
+//						jaspObject(const jaspObject& that) = delete;
 	virtual				~jaspObject();
 
 			std::string objectTitleString(std::string prefix)	const { return prefix + jaspObjectTypeToString(_type) + " " + _title; }
@@ -46,15 +46,17 @@ public:
 
 	virtual std::string toHtml() { return ""; }
 			std::string htmlTitle() { return "<h2>" + _title + "</h2>"; }
-
+			void		printHtml()							{ jaspPrint(toHtml()); }
 			std::string type() { return jaspObjectTypeToString(_type); }
 
 			bool		getError()								{ return _error; }
 	virtual void		setError()								{ _error = true; }
 	virtual void		setError(Rcpp::String message)			{ _errorMessage = jaspNativeToUtf8(message); _error = true; }
+			// Rcpp modules does not support function overloading
+			void		setErrorForR(Rcpp::String message)		{ setError(message); }
 	virtual bool		canShowErrorMessage()			const	{ return false; }
 
-			void		print()									{ try { jaspPrint(toString()); } catch(std::exception e) { jaspPrint(std::string("toString failed because of: ") + e.what()); } }
+			void		print()									{ try { jaspPrint(toString()); } catch(std::exception &e) { jaspPrint(std::string("toString failed because of: ") + e.what()); } }
 			void		addMessage(std::string msg)				{ _messages.push_back(msg); }
 	virtual void		childrenUpdatedCallbackHandler(bool)	{} ///Can be called by jaspResults to send changes and stuff like that.
 
@@ -173,74 +175,16 @@ private:
 	bool					_finalizedAlready = false;
 };
 
-#define JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR(JASP_TYPE, PROP_TYPE, PROP_NAME, PROP_CAPITALIZED_NAME) \
-	void set ## PROP_CAPITALIZED_NAME (PROP_TYPE new ## PROP_CAPITALIZED_NAME) { ((JASP_TYPE *)myJaspObject)->PROP_NAME = new ## PROP_CAPITALIZED_NAME; myJaspObject->notifyParentOfChanges(); } \
-	PROP_TYPE get ## PROP_CAPITALIZED_NAME () { return ((JASP_TYPE *)myJaspObject)->PROP_NAME; }
-
-#define JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR_NO_NOTIFY(JASP_TYPE, PROP_TYPE, PROP_NAME, PROP_CAPITALIZED_NAME) \
-	void set ## PROP_CAPITALIZED_NAME (PROP_TYPE new ## PROP_CAPITALIZED_NAME) { ((JASP_TYPE *)myJaspObject)->PROP_NAME = new ## PROP_CAPITALIZED_NAME; } \
-	PROP_TYPE get ## PROP_CAPITALIZED_NAME () { return ((JASP_TYPE *)myJaspObject)->PROP_NAME; }
-
-#define JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR_NATIVE_STRING(JASP_TYPE, PROP_NAME, PROP_CAPITALIZED_NAME) \
-void set ## PROP_CAPITALIZED_NAME (Rcpp::String new ## PROP_CAPITALIZED_NAME) { ((JASP_TYPE *)myJaspObject)->PROP_NAME = jaspNativeToUtf8( new ## PROP_CAPITALIZED_NAME ); myJaspObject->notifyParentOfChanges(); } \
-Rcpp::String get ## PROP_CAPITALIZED_NAME () { return ((JASP_TYPE *)myJaspObject)->PROP_NAME; }
-
-
-class jaspObject_Interface
-{
-public:
-	jaspObject_Interface(jaspObject * dataObj) : myJaspObject(dataObj)
-	{
-#ifdef JASP_RESULTS_DEBUG_TRACES
-		std::cout << "Interface to " << dataObj->objectTitleString() << " is created!\n"<<std::flush;
-#endif
-	}
-
-	jaspObject_Interface(const jaspObject_Interface* copyMe)
-	{
-#ifdef JASP_RESULTS_DEBUG_TRACES
-		std::cout << "Interface to " << copyMe->myJaspObject->objectTitleString() << " is copied!\n"<<std::flush;
-#endif
-		myJaspObject = copyMe->myJaspObject;
-	}
-
-	void		print()								{ myJaspObject->print(); }
-	void		addMessage(Rcpp::String msg)		{ myJaspObject->addMessage(jaspNativeToUtf8(msg)); }
-	std::string	toHtml()							{ return myJaspObject->toHtml(); }
-	std::string	type()								{ return myJaspObject->type(); }
-	void		printHtml()							{ jaspPrint(myJaspObject->toHtml()); }
-
-	void		setOptionMustBeDependency(std::string optionName, Rcpp::RObject mustBeThis)				{ myJaspObject->setOptionMustBeDependency(optionName, mustBeThis);				}
-	void		setOptionMustContainDependency(std::string optionName, Rcpp::RObject mustContainThis)	{ myJaspObject->setOptionMustContainDependency(optionName, mustContainThis);	}
-	void		dependOnOptions(Rcpp::CharacterVector listOptions)										{ myJaspObject->dependOnOptions(listOptions);									}
-	void		copyDependenciesFromJaspObject(jaspObject_Interface * other)							{ myJaspObject->copyDependenciesFromJaspObject(other->myJaspObject);			}
-	void		addCitation(Rcpp::String fullCitation)													{ myJaspObject->addCitation(jaspNativeToUtf8(fullCitation));						}
-
-	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR_NATIVE_STRING(jaspObject, _title,		Title)
-	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR_NATIVE_STRING(jaspObject, _info,		Info)
-	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR(jaspObject, int,			_position,	Position)
-
-	void		setError(Rcpp::String message)		{ myJaspObject->setError(jaspNativeToUtf8(message)); }
-	bool		getError()							{ return myJaspObject->getError(); }
-
-	jaspObject * returnMyJaspObject() { return myJaspObject; }
-
-protected:
-		jaspObject * myJaspObject = NULL;
-};
-
+RCPP_EXPOSED_CLASS_NODECL(jaspObject)
 
 void jaspObjectFinalizer(jaspObject * obj);
 #define JASP_OBJECT_FINALIZER_LAMBDA(JASP_TYPE) //.finalizer( [](JASP_TYPE * obj) { std::cout << "finalizerLambda " #JASP_TYPE " Called\n" << std::flush;  jaspObjectFinalizer(obj); })
 
 #define JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE) create_ ## JASP_TYPE
 #define JASP_OBJECT_CREATOR_FUNCTIONNAME_STR(JASP_TYPE) "create_cpp_" #JASP_TYPE
-#define JASP_OBJECT_CREATOR(JASP_TYPE) JASP_TYPE ## _Interface * JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE)(Rcpp::String title) { return new JASP_TYPE ## _Interface (new JASP_TYPE(title)); }
+#define JASP_OBJECT_CREATOR(JASP_TYPE) JASP_TYPE * JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE)(Rcpp::String title) { return new JASP_TYPE(title); }
 #define JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(JASP_TYPE) Rcpp::function(JASP_OBJECT_CREATOR_FUNCTIONNAME_STR(JASP_TYPE), &JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE))
-#define JASP_OBJECT_CREATOR_ARG(JASP_TYPE, EXTRA_ARG) JASP_TYPE ## _Interface * JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE)(Rcpp::String title, Rcpp::RObject EXTRA_ARG) { return new JASP_TYPE ## _Interface (new JASP_TYPE(title, EXTRA_ARG)); }
-
-
-RCPP_EXPOSED_CLASS_NODECL(jaspObject_Interface)
+#define JASP_OBJECT_CREATOR_ARG(JASP_TYPE, EXTRA_ARG) JASP_TYPE * JASP_OBJECT_CREATOR_FUNCTIONNAME(JASP_TYPE)(Rcpp::String title, Rcpp::RObject EXTRA_ARG) { return new JASP_TYPE(title, EXTRA_ARG); }
 
 //#define JASP_R_INTERFACE_TIMERS
 
