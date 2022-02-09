@@ -1,4 +1,8 @@
-# helper file that downloads jaspColumnEncoder if it is missing.
+# configure script that automatically downloads jaspColumnEncoder if it is missing.
+# to manual specify a location for jaspColumnEncoder and not download it, do
+#
+# options(configure.vars = c(jaspResults = "INCLUDE_DIR='-I<path>/github/jaspColumnEncoder -I<path>/github'"))
+# install.packages("jaspResults", ...)
 
 if test -f "/etc/redhat-release" && ! grep -Fq Fedora "/etc/redhat-release"; then
 	echo "on RHEL"
@@ -22,7 +26,7 @@ if [ "${INCLUDE_DIR}" ]; then
 
 	echo "Found INCLUDE_DIR: ${INCLUDE_DIR}"
 	DOWNLOAD_SUCCESS=0
-	PKG_CPPFLAGS=${INCLUDE_DIR}
+	PKG_CPPFLAGS="${INCLUDE_DIR}"
 
 else
 
