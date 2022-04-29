@@ -19,7 +19,8 @@ public:
 	Json::Value convertToJSON()								const	override;
 	void		convertFromJSON_SetFields(Json::Value in)			override;
 
-	std::string convertTextToHtml(const std::string text)	const;
+			std::string convertTextToHtml(  const std::string text)		const;
+	static	std::string sanitizeTextForHtml(const std::string text);
 
     void setText(std::string newRawText);
     std::string getText();

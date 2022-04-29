@@ -57,7 +57,7 @@ checkForJaspResultsInit <- function() {if (!exists("jaspResults", .GlobalEnv)) .
 
 is.JaspResultsObj <- function(x) {
 	inherits(x, "R6") && 
-  inherits(x, c("jaspResultsR", "jaspContainerR", "jaspObjR", "jaspOutputObjR", "jaspPlotR", "jaspTableR", "jaspHtmlR", "jaspStateR", "jaspColumnR"))
+  inherits(x, c("jaspResultsR", "jaspContainerR", "jaspObjR", "jaspOutputObjR", "jaspPlotR", "jaspTableR", "jaspHtmlR", "jaspStateR", "jaspColumnR", "jaspReportR"))
 }
 
 destroyAllAllocatedRObjects <- function() {
@@ -348,7 +348,7 @@ jaspHtmlR <- R6Class(
 			} else {
 				checkForJaspResultsInit()
 				htmlObj <- create_cpp_jaspHtml(text)
-			}
+			}*
 			
 			htmlObj$elementType <- elementType
 			htmlObj$class       <- class
@@ -373,6 +373,45 @@ jaspHtmlR <- R6Class(
 		class       = function(value) { if (missing(value)) private$jaspObject$class       else private$jaspObject$class       <- value },
 		maxWidth    = function(value) { if (missing(value)) private$jaspObject$maxWidth    else private$jaspObject$maxWidth    <- .jaspHtmlPixelizer(value) },
 		elementType = function(value) { if (missing(value)) private$jaspObject$elementType else private$jaspObject$elementType <- value }
+	)
+)
+
+
+jaspReportR <- R6Class(
+	classname = "jaspReportR",
+	inherit   = jaspOutputObjR,
+	cloneable = FALSE,
+	public    = list(
+	initialize = function(text="", report=FALSE, dependencies=NULL, title="hide me", position=NULL , info=NULL, jaspObject = NULL) {
+			# if you change "hide me" here then also change it in Common.R and in HtmlNode.js or come up with a way to define it in such a way to make it show EVERYWHERE...
+			if (!is.null(jaspObject)) {
+			  private$jaspObject <- jaspObject
+			  return()
+			} else if (jaspResultsCalledFromJasp()) {
+				reportObj <- jaspResultsModule$create_cpp_jaspReport(text, report)
+			} else {
+				checkForJaspResultsInit()
+				reportObj <- create_cpp_jaspReport(text, report)
+			}*
+			
+			reportObj$title       <- title
+			
+            if (!is.null(dependencies))
+			    reportObj$dependOnOptions(dependencies)
+
+            if (!is.null(info))
+			    reportObj$info <- info
+			
+			if (is.numeric(position))
+				reportObj$position = position
+
+			private$jaspObject <- reportObj
+			return()
+		}
+	),
+	active = list(
+		text         = function(value) { if (missing(value)) private$jaspObject$text         else private$jaspObject$text         <- value },
+		report = function(value) { if (missing(value)) private$jaspObject$report else private$jaspObject$report <- value }
 	)
 )
 
@@ -422,6 +461,7 @@ jaspContainerR <- R6Class(
         "Rcpp_jaspTable"     = jaspTableR$new(     jaspObject = cppObj ),
         "Rcpp_jaspContainer" = jaspContainerR$new( jaspObject = cppObj ),
         "Rcpp_jaspColumn"    = jaspColumnR$new(    jaspObject = cppObj ),
+		"Rcpp_jaspReport"    = jaspReportR$new(    jaspObject = cppObj ),
         "Rcpp_jaspState"     = jaspStateR$new(     jaspObject = cppObj ),
         "Rcpp_jaspHtml"      = jaspHtmlR$new(      jaspObject = cppObj ),
 				stop(sprintf("Invalid call to jaspCppToR6. Expected jaspResults object but got %s", class(cppObj)), domain = NA)

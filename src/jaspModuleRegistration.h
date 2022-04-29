@@ -17,6 +17,7 @@ RCPP_MODULE(jaspResults)
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspTable);
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspState);
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspColumn);
+	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspReport);
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspResults);
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspContainer);
 	JASP_OBJECT_CREATOR_FUNCTIONREGISTRATION(jaspQmlSource);
@@ -150,7 +151,7 @@ RCPP_MODULE(jaspResults)
 		.method( "[[<-",						&jaspTable_Interface::setColumn,					"Insert a single column into the table, if a string is used then it will look for an existing column name and set that column with the new data and otherwise will just add it at the end. If it is indexed by integer it will simply set it there.")
 
 		.method("setExpectedSize",				&jaspTable_Interface::setExpectedSize,				"Set the expected size of this table to the specified columnCount and rowCount. It will make your table show up, filled with dots, at this size and as you add data the dots will be replaced with it.")
-		.method("setExpectedColumns",			&jaspTable_Interface::setExpectedColumns,				"Set the expected size of this table to the specified columnCount. It will make your table show up, filled with dots, at this size and as you add data the dots will be replaced with it.")
+		.method("setExpectedColumns",			&jaspTable_Interface::setExpectedColumns,			"Set the expected size of this table to the specified columnCount. It will make your table show up, filled with dots, at this size and as you add data the dots will be replaced with it.")
 		.method("setExpectedRows",				&jaspTable_Interface::setExpectedRows,				"Set the expected size of this table to the specified rowCount. It will make your table show up, filled with dots, at this size and as you add data the dots will be replaced with it.")
 	;
 
@@ -162,11 +163,16 @@ RCPP_MODULE(jaspResults)
 		.property("class",			&jaspHtml_Interface::getClass,			&jaspHtml_Interface::setClass,			"The Css-class of this element, for monospace one could use jasp-code or simply leave it empty.")
 		.property("maxWidth",		&jaspHtml_Interface::getMaxWidth,		&jaspHtml_Interface::setMaxWidth,		"The Css-max-width property. It will be set on a span around your html.")
 	;
-
+	
+	Rcpp::class_<jaspReport_Interface>("jaspReport")
+		.derives<jaspObject_Interface>("jaspObject")
+		.property("text",			&jaspReport_Interface::getText,			&jaspReport_Interface::setText,			"The text of this element")
+        .property("report",	&jaspReport_Interface::getReport,	&jaspReport_Interface::setReport,	"Should a report be sent/made?")
+	;
 
 	Rcpp::class_<jaspState_Interface>("jaspState")
 		.derives<jaspObject_Interface>("jaspObject")
-		.property("object", &jaspState_Interface::getObject, &jaspState_Interface::setObject, "The object that you might want to keep for the next revision of your analysis.")
+		.property("object",			&jaspState_Interface::getObject, 		&jaspState_Interface::setObject, 		"The object that you might want to keep for the next revision of your analysis.")
 	;
 
 	Rcpp::class_<jaspColumn_Interface>("jaspColumn")
