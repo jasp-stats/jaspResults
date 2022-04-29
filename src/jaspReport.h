@@ -11,7 +11,7 @@ public:
 	~jaspReport() {}
 
 	std::string dataToString(std::string prefix="")			const	override;
-	std::string toHtml()											override;
+	std::string toHtml()									const	override;
 
 	Json::Value	metaEntry()									const	override { return constructMetaEntry("reportNode"); }
 	Json::Value	dataEntry(std::string & errorMessage)		const	override;

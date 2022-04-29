@@ -9,7 +9,7 @@ public:
 	~jaspHtml() {}
 
 	std::string dataToString(std::string prefix="")			const	override;
-	std::string toHtml()											override;
+	std::string toHtml()									const	override;
 
 	Json::Value	metaEntry()									const	override { return constructMetaEntry("htmlNode"); }
 	Json::Value	dataEntry(std::string & errorMessage)		const	override;

@@ -47,8 +47,8 @@ public:
 	virtual	std::string dataToString(std::string)				const { return ""; }
 			std::string toString(std::string prefix = "")		const;
 
-	virtual std::string toHtml() { return ""; }
-			std::string htmlTitle() { return "<h2>" + _title + "</h2>"; }
+	virtual std::string toHtml()	const { return ""; }
+			std::string htmlTitle() const { return "<h2>" + _title + "</h2>"; }
 
 			std::string type() { return jaspObjectTypeToString(_type); }
 

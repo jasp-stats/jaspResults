@@ -102,7 +102,7 @@ std::string jaspContainer::dataToString(std::string prefix) const
 	return out.str();
 }
 
-std::string jaspContainer::toHtml()
+std::string jaspContainer::toHtml() const
 {
 	std::stringstream out;
 
@@ -110,8 +110,8 @@ std::string jaspContainer::toHtml()
 			<< htmlTitle() << "\n"
 			<< "<ul>";
 
-	for(auto key : getSortedDataFields())
-		out << "<li><p><b>" << key << "</b></p>" << _data[key]->toHtml() << "</li>\n";
+	for(const auto & key : getSortedDataFields())
+		out << "<li><p><b>" << key << "</b></p>" << _data.at(key)->toHtml() << "</li>\n";
 
 	out << "</ul>" "\n" "</div>" "\n";
 

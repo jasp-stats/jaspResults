@@ -42,7 +42,7 @@ std::string jaspHtml::convertTextToHtml(std::string text) const
     return out.str();
 }
 
-std::string jaspHtml::toHtml()
+std::string jaspHtml::toHtml() const
 {
 	return (_elementType != "errorMsg" ? "<div class=\"jaspHtml\" style=\"max-width:" + _maxWidth + ";\">\n" : "<div class=\"analysis-error-message error-message-box ui-state-error\"><span class=\"ui-icon ui-icon-alert\" style=\"float: left; margin-right: .3em;\"/>\n" )
 			+ htmlTitle() + "\n" + dataToString() + "</div>" "\n";

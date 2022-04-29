@@ -1,14 +1,15 @@
 #include "jaspReport.h"
-
+#include "jaspHtml.h"
 
 std::string jaspReport::dataToString(std::string prefix) const
 {
-    return convertTextToHtml(_rawText);
+    return jaspHtml::sanitizeTextForHtml(_rawText);
 }
 
-std::string jaspReport::toHtml()
+std::string jaspReport::toHtml() const
 {
-	return "<div class=\"jaspReport" + (_report ? "Do" : "Dont") + "\">\n" + htmlTitle() + "\n<p>" + jaspHtml::sanitizeTextForHtml(_rawText) + "</p></div>";
+	//we add two classes, one to indicate it is a jaspReport (and to easily set display:none/block and jaspReportDo(nt) to indicate whether the user should be alerted or not
+	return std::string("<div class=\"jaspReport jaspReport") + (_report ? "Do" : "Dont") + "\">\n" + htmlTitle() + "\n<p>" + jaspHtml::sanitizeTextForHtml(_rawText) + "</p></div>";
 }
 
 Json::Value jaspReport::dataEntry(std::string & errorMessage) const
