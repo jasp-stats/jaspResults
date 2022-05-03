@@ -392,13 +392,14 @@ jaspReportR <- R6Class(
 			  private$jaspObject <- jaspObject
 			  return()
 			} else if (jaspResultsCalledFromJasp()) {
-				reportObj <- jaspResultsModule$create_cpp_jaspReport(text, report)
+				reportObj <- jaspResultsModule$create_cpp_jaspReport(text)
 			} else {
 				checkForJaspResultsInit()
-				reportObj <- create_cpp_jaspReport(text, report)
+				reportObj <- create_cpp_jaspReport(text)
 			}*
 			
-			reportObj$title       <- title
+			reportObj$title  <- title
+			reportObj$report <- report
 			
             if (!is.null(dependencies))
 			    reportObj$dependOnOptions(dependencies)
@@ -414,7 +415,7 @@ jaspReportR <- R6Class(
 		}
 	),
 	active = list(
-		text         = function(value) { if (missing(value)) private$jaspObject$text         else private$jaspObject$text         <- value },
+		text   = function(value) { if (missing(value)) private$jaspObject$text   else private$jaspObject$text   <- value },
 		report = function(value) { if (missing(value)) private$jaspObject$report else private$jaspObject$report <- value }
 	)
 )
